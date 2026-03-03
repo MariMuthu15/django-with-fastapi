@@ -4,13 +4,14 @@ A powerful hybrid backend combining **Django** for authentication/user managemen
 
 ## Tech Stack
 - **Frameworks**: Django 6.x, FastAPI
+- **AI Integration**: Google Gemini (via `google-genai` SDK)
 - **Environment Management**: `uv`
 - **ASGI Server**: Uvicorn
 - **ORM**: Django ORM (Shared)
 
 ## Project Structure
 - `core/`: Django project settings and unified ASGI configuration.
-- `api/`: FastAPI application logic.
+- `api/`: FastAPI application logic including Gemini services.
 - `manage.py`: Django management script.
 - `pyproject.toml`: `uv` project definition.
 
@@ -29,7 +30,13 @@ The project uses `uv` for lightning-fast dependency management.
 uv sync
 ```
 
-### 3. Activate Virtual Environment
+### 3. Environment Variables
+Create a `.env` file in the project root with your Gemini API key:
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 4. Activate Virtual Environment
 ```bash
 source .venv/bin/activate
 ```
@@ -55,8 +62,11 @@ uv run uvicorn core.asgi:application --reload --port 8000
 ## API Endpoints
 
 ### FastAPI (via `/api/v1`)
-- **Health Check (with ORM integration)**: `GET http://localhost:8000/api/v1/fastapi/health`
-- **Async LLM Placeholder**: `POST http://localhost:8000/api/v1/fastapi/llm/async?prompt=your_prompt`
+- **Health Check**: `GET http://localhost:8000/api/v1/fastapi/health`
+- **Gemini Chat**: `POST http://localhost:8000/api/v1/fastapi/chat`
+  - Body: `{"message": "your prompt"}`
+  - Note: Responses are returned in **plain text only**.
+- **Gemini Async LLM**: `POST http://localhost:8000/api/v1/fastapi/llm/async?prompt=your_prompt`
 - **WebSocket**: `ws://localhost:8000/api/v1/fastapi/ws`
 
 ### Django

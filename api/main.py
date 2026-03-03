@@ -3,6 +3,8 @@ import django
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
+from api.services import gemini_service
+from pydantic import BaseModel
 
 # Setup Django environment to use ORM in FastAPI
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
@@ -36,8 +38,21 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("WebSocket client disconnected")
 
+class ChatRequest(BaseModel):
+    message: str
+
+@app.post("/fastapi/chat")
+async def chat_with_gemini(request: ChatRequest):
+    """
+    General chat endpoint for Gemini.
+    """
+    response = await gemini_service.get_response(request.message)
+    return {"response": response, "status": "completed"}
+
 @app.post("/fastapi/llm/async")
-async def llm_placeholder(prompt: str):
-    # Simulate an async LLM call
-    await asyncio.sleep(2)
-    return {"response": f"Processed prompt: {prompt}", "status": "completed"}
+async def llm_gemini_async(prompt: str):
+    """
+    Updated placeholder to use actual Gemini API.
+    """
+    response = await gemini_service.get_response(prompt)
+    return {"response": response, "status": "completed"}
