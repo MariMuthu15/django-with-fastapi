@@ -1,5 +1,5 @@
 import os
-from google import genai
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,28 +10,24 @@ class GeminiService:
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not set in .env file")
         
-        self.client = genai.Client(
-            api_key=api_key,
-            http_options={'api_version': 'v1alpha'}
+        genai.configure(api_key=api_key)
+        self.model_name = 'models/gemini-flash-lite-latest'
+        self.system_instruction = "You are a helpful assistant. Provide concise and accurate responses using markdown formatting where appropriate."
+        self.model = genai.GenerativeModel(
+            model_name=self.model_name,
+            system_instruction=self.system_instruction
         )
-        self.model_id = 'gemini-flash-latest'
-        self.system_instruction = "You are a helpful assistant. Provide your responses in plain text only. Do not use markdown formatting such as bolding (**), italics (_), headers (#), or lists (-). Use simple text structure instead."
 
     async def get_response(self, prompt: str):
         try:
-            # The new SDK also has a synchronous call, we'll run it in a thread.
             import asyncio
             response = await asyncio.to_thread(
-                self.client.models.generate_content,
-                model=self.model_id,
-                contents=prompt,
-                config=genai.types.GenerateContentConfig(
-                    system_instruction=self.system_instruction
-                )
+                self.model.generate_content,
+                prompt
             )
             return response.text
         except Exception as e:
-            return f"Error communicating with Gemini (new SDK): {str(e)}"
+            return f"Error communicating with Gemini: {str(e)}"
 
 # Singleton instance
 gemini_service = GeminiService()
